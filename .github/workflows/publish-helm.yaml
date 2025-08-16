@@ -8,6 +8,13 @@ on:
       - 'values.yaml'
       - 'templates/**'
       - '.github/workflows/publish-helm.yaml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'Chart.yaml'
+      - 'values.yaml'
+      - 'templates/**'
+      - '.github/workflows/publish-helm.yaml'
   workflow_dispatch: {}
 
 permissions:
@@ -38,12 +45,24 @@ jobs:
       - name: Lint chart
         run: helm lint .
 
+      - name: Render templates (dry-run validation)
+        run: |
+          helm template test-release . --values values.yaml >/dev/null
+
       - name: Package chart
         run: |
           mkdir -p repo
           helm package . --destination repo
 
+      - name: Upload chart package (PR dry run)
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: chart-packages
+          path: repo/*.tgz
+
       - name: Checkout gh-pages branch (if exists)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         id: pages
         uses: actions/checkout@v4
         with:
@@ -52,6 +71,7 @@ jobs:
         continue-on-error: true
 
       - name: Merge existing index and packages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           set -e
           if [ -d gh-pages ]; then
@@ -66,6 +86,7 @@ jobs:
           fi
 
       - name: Publish to gh-pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
