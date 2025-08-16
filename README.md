@@ -86,10 +86,28 @@ helm repo update
 helm install my-bstack my-bookstack/bookstack
 ```
 
+## GitHub Actions: Auto-publish to gh-pages
+
+This repo includes a workflow at `.github/workflows/publish-helm.yaml` that packages the chart and publishes it to the `gh-pages` branch as a Helm repo. It runs on pushes to `main` that modify chart files, and on manual dispatch.
+
+Steps to enable:
+
+1. In repo settings, enable GitHub Pages to serve from the `gh-pages` branch (root).
+2. Ensure the workflow has `permissions: contents: write` (already set) so it can push.
+3. Push to `main`. The workflow will create/update `gh-pages` with packaged charts and `index.yaml`.
+
+The repo URL used by the workflow is:
+
+```
+https://<owner>.github.io/<repo>
+```
+
+If using a custom domain, update the `REPO_URL` logic in the workflow and pass a `cname` input to the gh-pages action to publish a CNAME file.
+
 ## Notes on the image
 
 This chart defaults to the LinuxServer.io `bookstack` image. If you prefer an official image in future, change `image.repository` and env var names accordingly.
 
 Links:
-- BookStack Docker docs: https://www.bookstackapp.com/docs/admin/installation/\#docker
+- BookStack Docker docs: https://www.bookstackapp.com/docs/admin/installation/#docker
 - LinuxServer.io image: https://hub.docker.com/r/linuxserver/bookstack

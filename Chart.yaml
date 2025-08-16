@@ -21,8 +21,8 @@ sources:
   - https://hub.docker.com/r/linuxserver/bookstack
 
 maintainers:
-  - name: Maintainer
-    email: you@example.com
+  - name: Mohamed Geis
+    email: mohgeis@gmail.com
 
 annotations:
   category: wiki
