@@ -8,6 +8,6 @@ keywords:
   - documentation
 links:
   - name: "Source"
-    url: "https://github.com/${GITHUB_REPOSITORY}"
+    url: "https://github.com/mohgeis/bookstack-helm-chart"
   - name: "Project"
     url: "https://www.bookstackapp.com/"
