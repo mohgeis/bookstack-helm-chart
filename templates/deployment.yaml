@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "bookstack.fullname" . }}
+  labels:
+    {{- include "bookstack.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "bookstack.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "bookstack.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext:
+        fsGroup: {{ .Values.podSecurityContext.fsGroup }}
+      {{- end }}
+      containers:
+        - name: bookstack
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          env:
+            - name: PUID
+              value: "{{ .Values.app.puid }}"
+            - name: PGID
+              value: "{{ .Values.app.pgid }}"
+            - name: TZ
+              value: "{{ .Values.app.timezone }}"
+            - name: APP_URL
+              value: "{{ .Values.app.url }}"
+            {{- if not .Values.db.existingSecret }}
+            - name: DB_HOST
+              value: "{{ .Values.db.host }}"
+            - name: DB_PORT
+              value: "{{ .Values.db.port }}"
+            - name: DB_DATABASE
+              value: "{{ .Values.db.name }}"
+            - name: DB_USER
+              value: "{{ .Values.db.user }}"
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bookstack.fullname" . }}-db
+                  key: db-password
+            {{- else }}
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.existingSecret }}
+                  key: db-host
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.existingSecret }}
+                  key: db-port
+            - name: DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.existingSecret }}
+                  key: db-name
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.existingSecret }}
+                  key: db-user
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.existingSecret }}
+                  key: db-password
+            {{- end }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if .Values.securityContext.enabled }}
+          securityContext:
+            runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
+            runAsUser: {{ .Values.securityContext.runAsUser }}
+            runAsGroup: {{ .Values.securityContext.runAsGroup }}
+          {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /config
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: config
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ if .Values.persistence.existingClaim }}{{ .Values.persistence.existingClaim }}{{ else }}{{ include "bookstack.fullname" . }}-config{{ end }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+---
+{{- if and (not .Values.db.existingSecret) (.Values.db.password) }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "bookstack.fullname" . }}-db
+  labels:
+    {{- include "bookstack.labels" . | nindent 4 }}
+type: Opaque
+data:
+  db-user: {{ .Values.db.user | b64enc | quote }}
+  db-password: {{ .Values.db.password | b64enc | quote }}
+  db-name: {{ .Values.db.name | b64enc | quote }}
+  db-host: {{ .Values.db.host | b64enc | quote }}
+  db-port: {{ (printf "%d" .Values.db.port) | b64enc | quote }}
+{{- end }}

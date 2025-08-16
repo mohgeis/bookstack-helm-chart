@@ -1,2 +1,95 @@
 # bookstack-helm-chart
-A helm chart for bookstack
+
+A Helm chart to deploy [BookStack](https://www.bookstackapp.com/) using the LinuxServer.io image.
+
+- Image: `linuxserver/bookstack` ([Docker Hub](https://hub.docker.com/r/linuxserver/bookstack))
+- Upstream install docs: see [BookStack Docker installation](https://www.bookstackapp.com/docs/admin/installation/#docker)
+
+## TL;DR
+
+```bash
+helm repo add my-bookstack https://<your-gh-pages-or-host>/bookstack-helm-chart
+helm install my-bstack my-bookstack/bookstack \
+  --set app.url=https://docs.example.com \
+  --set db.host=mariadb.default.svc.cluster.local \
+  --set db.user=bookstack --set db.password=supersecret
+```
+
+## Prerequisites
+
+- A reachable MySQL/MariaDB instance and credentials.
+- Persistent storage class (if `persistence.enabled=true`).
+
+## Configuration
+
+Key values (see `values.yaml` for full list):
+
+- `image.repository` / `image.tag`
+- `app.url` (required)
+- `app.timezone`, `app.puid`, `app.pgid`
+- `db.host`, `db.port`, `db.name`, `db.user`, `db.password` or `db.existingSecret`
+- `service.*`, `ingress.*`
+- `persistence.*`
+
+## Using an existing secret for DB
+
+Create a secret with keys: `db-user`, `db-password`, `db-name`, `db-host`, `db-port` and set `db.existingSecret` to its name.
+
+```bash
+kubectl create secret generic bookstack-db \
+  --from-literal=db-user=bookstack \
+  --from-literal=db-password=supersecret \
+  --from-literal=db-name=bookstack \
+  --from-literal=db-host=mariadb \
+  --from-literal=db-port=3306
+```
+
+## Ingress Example
+
+```yaml
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: docs.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: docs-tls
+      hosts:
+        - docs.example.com
+```
+
+## Packaging & Publishing a Helm repo
+
+- Package:
+
+```bash
+helm package .
+```
+
+- Generate `index.yaml` for your repo folder:
+
+```bash
+mkdir -p repo && mv bookstack-*.tgz repo/
+helm repo index repo --url https://<your-gh-pages-or-host>/bookstack-helm-chart
+```
+
+- Serve statically (e.g., GitHub Pages). Commit and push `repo/`.
+
+Consumers can add your repo:
+
+```bash
+helm repo add my-bookstack https://<your-gh-pages-or-host>/bookstack-helm-chart
+helm repo update
+helm install my-bstack my-bookstack/bookstack
+```
+
+## Notes on the image
+
+This chart defaults to the LinuxServer.io `bookstack` image. If you prefer an official image in future, change `image.repository` and env var names accordingly.
+
+Links:
+- BookStack Docker docs: https://www.bookstackapp.com/docs/admin/installation/\#docker
+- LinuxServer.io image: https://hub.docker.com/r/linuxserver/bookstack

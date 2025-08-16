@@ -1,0 +1,96 @@
+# Default values for the BookStack Helm chart.
+# Image
+image:
+  repository: linuxserver/bookstack
+  tag: latest
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+# Application Settings
+app:
+  # Public URL for BookStack, used for generating links & cookies
+  url: "http://bookstack.local"
+  # LinuxServer.io base image settings
+  timezone: "UTC"
+  puid: 1000
+  pgid: 1000
+
+# Database configuration (provide an external MySQL/MariaDB)
+db:
+  host: "mariadb"
+  port: 3306
+  name: "bookstack"
+  user: "bookstack"
+  password: "change-me"
+  # Optionally source credentials from an existing secret
+  # When set, keys must be: db-user, db-password, db-name, db-host, db-port
+  existingSecret: ""
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 80
+  annotations: {}
+
+# Ingress configuration
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: bookstack.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  # - secretName: bookstack-tls
+  #   hosts:
+  #     - bookstack.local
+
+# Persistence for /config inside the container
+persistence:
+  enabled: true
+  existingClaim: ""
+  storageClass: ""
+  accessModes:
+    - ReadWriteOnce
+  size: 8Gi
+  annotations: {}
+
+# Pod level security context
+podSecurityContext:
+  enabled: true
+  fsGroup: 1000
+
+# Container level security context
+securityContext:
+  enabled: true
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+
+# Resources
+resources: {}
+#  limits:
+#    cpu: 200m
+#    memory: 512Mi
+#  requests:
+#    cpu: 100m
+#    memory: 256Mi
+
+# Node scheduling
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Extra environment variables
+extraEnv: []
+# - name: SOME_VAR
+#   value: some-value
+
+# Extra environment vars sourced from secret or configmap
+extraEnvFrom: []
+# - secretRef:
+#     name: my-secret

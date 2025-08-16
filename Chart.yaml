@@ -1,0 +1,34 @@
+apiVersion: v2
+name: bookstack
+description: A Helm chart for deploying BookStack using the LinuxServer.io container
+
+# Chart and app versions
+version: 0.1.0
+appVersion: "latest"
+
+type: application
+
+keywords:
+  - bookstack
+  - wiki
+  - documentation
+  - knowledge-base
+  - linuxserver
+
+home: https://www.bookstackapp.com/
+sources:
+  - https://www.bookstackapp.com/docs/admin/installation/#docker
+  - https://hub.docker.com/r/linuxserver/bookstack
+
+maintainers:
+  - name: Maintainer
+    email: you@example.com
+
+annotations:
+  category: wiki
+  artifacthub.io/license: MIT
+  artifacthub.io/links: |
+    - name: Upstream Docs
+      url: https://www.bookstackapp.com/docs/admin/installation/#docker
+    - name: Container Image
+      url: https://hub.docker.com/r/linuxserver/bookstack

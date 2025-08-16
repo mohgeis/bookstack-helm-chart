@@ -1,0 +1,18 @@
+# Common VCS dirs
+.git/
+.gitignore
+
+# IDE/editor files
+*.swp
+*.bak
+*.tmp
+*.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Chart packaging artifacts
+charts/
+Chart.lock
