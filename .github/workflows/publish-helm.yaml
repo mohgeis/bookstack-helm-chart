@@ -1,4 +1,4 @@
-name: Publish Helm Chart
+name: Publish Helm Chart (OCI)
 
 on:
   push:
@@ -18,7 +18,8 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: write
+  contents: read
+  packages: write
 
 concurrency:
   group: publish-helm
@@ -37,10 +38,6 @@ jobs:
         uses: azure/setup-helm@v4
         with:
           version: v3.14.4
-
-      - name: Compute repo URL
-        run: |
-          echo "REPO_URL=https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
 
       - name: Lint chart
         run: helm lint .
@@ -61,35 +58,18 @@ jobs:
           name: chart-packages
           path: repo/*.tgz
 
-      - name: Checkout gh-pages branch (if exists)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        id: pages
-        uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-          path: gh-pages
-        continue-on-error: true
-
-      - name: Merge existing index and packages
+      - name: Login to GHCR (for OCI push)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          set -e
-          if [ -d gh-pages ]; then
-            cp -a gh-pages/*.tgz repo/ 2>/dev/null || true
-            if [ -f gh-pages/index.yaml ]; then
-              helm repo index repo --url "$REPO_URL" --merge gh-pages/index.yaml
-            else
-              helm repo index repo --url "$REPO_URL"
-            fi
-          else
-            helm repo index repo --url "$REPO_URL"
-          fi
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
 
-      - name: Publish to gh-pages
+      - name: Push chart to GHCR (OCI)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: repo
-          commit_message: 'chore(helm): publish chart [skip ci]'
+        env:
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+          OWNER_LC=$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')
+          PKG=$(ls repo/*.tgz | head -n1)
+          echo "Pushing $PKG to oci://ghcr.io/$OWNER_LC/bookstack"
+          helm push "$PKG" oci://ghcr.io/$OWNER_LC/bookstack

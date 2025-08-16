@@ -61,6 +61,26 @@ ingress:
         - docs.example.com
 ```
 
+## Publishing to Artifact Hub (OCI via GHCR)
+
+This chart is configured to publish to GitHub Container Registry (OCI) on merges to `main`. You can then add the OCI repo in Artifact Hub.
+
+Publish flow:
+
+1. On merge to `main`, the GitHub Action logs in to GHCR and pushes the packaged chart to `oci://ghcr.io/<owner>/bookstack`.
+2. Artifact Hub can index this OCI repository when you register it.
+
+Register in Artifact Hub:
+
+1. Sign in to Artifact Hub with your GitHub account: https://artifacthub.io/
+2. Add a new repository: Type `Helm charts`, Kind `OCI`, URL `oci://ghcr.io/<owner>/bookstack`.
+3. Ensure `.artifacthub-repo.yml` exists with owners info (added with your email), and `charts/artifacthub-repo.yml` includes `type: oci`.
+4. Save. Artifact Hub will validate and begin indexing releases.
+
+Dry run on PRs: the workflow lints, renders, packages, and uploads the `.tgz` as an artifact without publishing.
+
+If you prefer classic Helm repo indexing instead of OCI, see the section below.
+
 ## Packaging & Publishing a Helm repo
 
 - Package:

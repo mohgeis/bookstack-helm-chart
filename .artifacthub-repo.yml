@@ -1,0 +1,13 @@
+repositoryID: ""
+owners:
+  - name: "mohgeis"
+    email: "mohgeis@gmail.com"
+keywords:
+  - bookstack
+  - wiki
+  - documentation
+links:
+  - name: "Source"
+    url: "https://github.com/${GITHUB_REPOSITORY}"
+  - name: "Project"
+    url: "https://www.bookstackapp.com/"
