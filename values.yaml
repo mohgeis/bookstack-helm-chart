@@ -27,6 +27,10 @@ app:
     # Key name within the secret that holds the value
     secretKey: app-key
 
+# Sync current env vars into /config/www/.env on (re)start to avoid stale values on PVC
+envToDotenv:
+  enabled: true
+
 # Database configuration (provide an external MySQL/MariaDB)
 db:
   host: "mariadb"
