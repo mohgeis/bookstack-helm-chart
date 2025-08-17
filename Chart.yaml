@@ -3,8 +3,8 @@ name: bookstack
 description: A Helm chart for deploying BookStack using the LinuxServer.io container
 
 # Chart and app versions
-version: 0.1.0
-appVersion: "latest"
+version: 0.2.0
+appVersion: "25.07.1"
 
 type: application
 
