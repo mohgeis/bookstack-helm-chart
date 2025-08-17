@@ -34,22 +34,15 @@ spec:
               set -e
               ENV_FILE=/config/www/.env
               touch "$ENV_FILE"
-              {% raw %}update_kv(){ key="$1"; val="$2"; if grep -q "^$key=" "$ENV_FILE"; then sed -i "s#^$key=.*#$key=$val#" "$ENV_FILE"; else echo "$key=$val" >> "$ENV_FILE"; fi; }{% endraw %}
-              {{- /* Sync key envs to .env to override PVC defaults */}}
-              {{- if .Values.app.url }} update_kv APP_URL "{{ .Values.app.url }}"; {{- end }}
-              {{- if not .Values.db.existingSecret }}
-              update_kv DB_HOST "{{ .Values.db.host }}";
-              update_kv DB_PORT "{{ .Values.db.port }}";
-              update_kv DB_DATABASE "{{ .Values.db.name }}";
-              update_kv DB_USERNAME "{{ .Values.db.user }}";
-              {{- else }}
-              update_kv DB_HOST "$(printenv DB_HOST)";
-              update_kv DB_PORT "$(printenv DB_PORT)";
-              update_kv DB_DATABASE "$(printenv DB_DATABASE)";
-              update_kv DB_USERNAME "$(printenv DB_USER)";
-              {{- end }}
-              {{- /* APP_KEY is secret-based; export into .env too */}}
-              if [ -n "$(printenv APP_KEY)" ]; then update_kv APP_KEY "$(printenv APP_KEY)"; fi
+              # APP_URL from values
+              TMP="$ENV_FILE.tmp"; grep -v '^APP_URL=' "$ENV_FILE" > "$TMP" || true; echo "APP_URL={{ .Values.app.url }}" >> "$TMP"; mv "$TMP" "$ENV_FILE"
+              # DB settings from env (secret or values rendered into env)
+              if [ -n "$DB_HOST" ]; then TMP="$ENV_FILE.tmp"; grep -v '^DB_HOST=' "$ENV_FILE" > "$TMP" || true; echo "DB_HOST=$DB_HOST" >> "$TMP"; mv "$TMP" "$ENV_FILE"; fi
+              if [ -n "$DB_PORT" ]; then TMP="$ENV_FILE.tmp"; grep -v '^DB_PORT=' "$ENV_FILE" > "$TMP" || true; echo "DB_PORT=$DB_PORT" >> "$TMP"; mv "$TMP" "$ENV_FILE"; fi
+              if [ -n "$DB_DATABASE" ]; then TMP="$ENV_FILE.tmp"; grep -v '^DB_DATABASE=' "$ENV_FILE" > "$TMP" || true; echo "DB_DATABASE=$DB_DATABASE" >> "$TMP"; mv "$TMP" "$ENV_FILE"; fi
+              if [ -n "$DB_USER" ]; then TMP="$ENV_FILE.tmp"; grep -v '^DB_USERNAME=' "$ENV_FILE" > "$TMP" || true; echo "DB_USERNAME=$DB_USER" >> "$TMP"; mv "$TMP" "$ENV_FILE"; fi
+              # APP_KEY from secret/env
+              if [ -n "$APP_KEY" ]; then TMP="$ENV_FILE.tmp"; grep -v '^APP_KEY=' "$ENV_FILE" > "$TMP" || true; echo "APP_KEY=$APP_KEY" >> "$TMP"; mv "$TMP" "$ENV_FILE"; fi
               exec /init
           {{- end }}
           env:
