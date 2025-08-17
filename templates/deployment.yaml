@@ -18,6 +18,13 @@ spec:
       securityContext:
         fsGroup: {{ .Values.podSecurityContext.fsGroup }}
       {{- end }}
+      initContainers:
+        - name: init-www-dir
+          image: busybox
+          command: ['sh', '-c', 'mkdir -p /config/www && chmod 755 /config/www']
+          volumeMounts:
+            - name: config
+              mountPath: /config
       containers:
         - name: bookstack
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
