@@ -81,6 +81,33 @@ Dry run on PRs: the workflow lints, renders, packages, and uploads the `.tgz` as
 
 If you prefer classic Helm repo indexing instead of OCI, see the section below.
 
+## TLS via cert-manager (optional)
+
+If you already have cert-manager and an Issuer/ClusterIssuer, you can have the chart request a certificate automatically:
+
+```yaml
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: bookstack.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+certificate:
+  enabled: true
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod
+  # Optional overrides
+  # secretName: bookstack-tls
+  # dnsNames:
+  #   - bookstack.example.com
+```
+
+The certificate secret will be referenced by the Ingress as usual via `ingress.tls`.
+
 ## Packaging & Publishing a Helm repo
 
 - Package:

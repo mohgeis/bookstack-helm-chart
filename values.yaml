@@ -47,6 +47,20 @@ ingress:
   #   hosts:
   #     - bookstack.local
 
+# cert-manager Certificate (optional)
+certificate:
+  enabled: false
+  # Secret that will store the issued certificate. Defaults to "<release>-bookstack-tls" if empty
+  secretName: ""
+  issuerRef:
+    # Usually ClusterIssuer or Issuer
+    kind: ClusterIssuer
+    # Set to your existing issuer name, e.g. letsencrypt-prod
+    name: ""
+  # If empty, defaults to hosts from ingress.hosts
+  dnsNames: []
+  annotations: {}
+
 # Persistence for /config inside the container
 persistence:
   enabled: true
