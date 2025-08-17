@@ -13,8 +13,8 @@ metadata:
 spec:
   secretName: {{ default (printf "%s-tls" (include "bookstack.fullname" .)) .Values.certificate.secretName }}
   issuerRef:
-    kind: {{ .Values.certificate.issuerRef.kind | default "ClusterIssuer" }}
-    name: {{ required "certificate.issuerRef.name is required when certificate.enabled=true" .Values.certificate.issuerRef.name }}
+    kind: Issuer
+    name: {{ include "bookstack.fullname" . }}-issuer
   dnsNames:
     {{- if .Values.certificate.dnsNames }}
     {{- toYaml .Values.certificate.dnsNames | nindent 4 }}
