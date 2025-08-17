@@ -2,7 +2,8 @@
 # Image
 image:
   repository: linuxserver/bookstack
-  tag: latest
+  # When empty, the chart will use .Chart.AppVersion as the image tag
+  tag: ""
   pullPolicy: IfNotPresent
   pullSecrets: []
 
