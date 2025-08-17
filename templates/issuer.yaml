@@ -24,6 +24,4 @@ spec:
             metadata:
               annotations:
                 kubernetes.io/ingress.class: {{ .Values.ingress.className | default "nginx" }}
-            spec:
-              ingressClassName: {{ .Values.ingress.className | default "nginx" }}
 {{- end }}
