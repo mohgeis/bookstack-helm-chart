@@ -41,6 +41,7 @@ spec:
               if [ -n "$DB_PORT" ]; then TMP="$ENV_FILE.tmp"; grep -v '^DB_PORT=' "$ENV_FILE" > "$TMP" || true; echo "DB_PORT=$DB_PORT" >> "$TMP"; mv "$TMP" "$ENV_FILE"; fi
               if [ -n "$DB_DATABASE" ]; then TMP="$ENV_FILE.tmp"; grep -v '^DB_DATABASE=' "$ENV_FILE" > "$TMP" || true; echo "DB_DATABASE=$DB_DATABASE" >> "$TMP"; mv "$TMP" "$ENV_FILE"; fi
               if [ -n "$DB_USER" ]; then TMP="$ENV_FILE.tmp"; grep -v '^DB_USERNAME=' "$ENV_FILE" > "$TMP" || true; echo "DB_USERNAME=$DB_USER" >> "$TMP"; mv "$TMP" "$ENV_FILE"; fi
+              if [ -n "$DB_PASS" ]; then TMP="$ENV_FILE.tmp"; grep -v '^DB_PASSWORD=' "$ENV_FILE" > "$TMP" || true; echo "DB_PASSWORD=$DB_PASS" >> "$TMP"; mv "$TMP" "$ENV_FILE"; fi
               # APP_KEY from secret/env
               if [ -n "$APP_KEY" ]; then TMP="$ENV_FILE.tmp"; grep -v '^APP_KEY=' "$ENV_FILE" > "$TMP" || true; echo "APP_KEY=$APP_KEY" >> "$TMP"; mv "$TMP" "$ENV_FILE"; fi
               exec /init
