@@ -27,9 +27,29 @@ Key values (see `values.yaml` for full list):
 - `image.repository` / `image.tag`
 - `app.url` (required)
 - `app.timezone`, `app.puid`, `app.pgid`
+- `app.appKey.*` (APP_KEY management)
 - `db.host`, `db.port`, `db.name`, `db.user`, `db.password` or `db.existingSecret`
 - `service.*`, `ingress.*`
 - `persistence.*`
+
+### APP_KEY management
+
+By default, the chart can provision the Laravel `APP_KEY` automatically via a Secret, or you can bring your own:
+
+```yaml
+app:
+  appKey:
+    enabled: true           # if true, create a Secret if none is provided
+    value: ""               # optional explicit value (e.g., base64:...)
+    existingSecret: ""      # set to use an existing Secret
+    secretName: ""          # override created Secret name (default: <release>-bookstack-appkey)
+    secretKey: app-key       # key name within the Secret
+```
+
+Priority:
+- `existingSecret` → use that secret
+- else if `value` or `enabled` → create/use managed secret
+- else → no APP_KEY set (container will error)
 
 ## Using an existing secret for DB
 

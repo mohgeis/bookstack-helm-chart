@@ -35,6 +35,20 @@ spec:
               value: "{{ .Values.app.timezone }}"
             - name: APP_URL
               value: "{{ .Values.app.url }}"
+            {{- /* APP_KEY priority: existingSecret > generated/inline secret > none */}}
+            {{- if .Values.app.appKey.existingSecret }}
+            - name: APP_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.appKey.existingSecret }}
+                  key: {{ .Values.app.appKey.secretKey | default "app-key" }}
+            {{- else if or .Values.app.appKey.value .Values.app.appKey.enabled }}
+            - name: APP_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-appkey" (include "bookstack.fullname" .)) .Values.app.appKey.secretName }}
+                  key: {{ .Values.app.appKey.secretKey | default "app-key" }}
+            {{- end }}
             {{- if not .Values.db.existingSecret }}
             - name: DB_HOST
               value: "{{ .Values.db.host }}"

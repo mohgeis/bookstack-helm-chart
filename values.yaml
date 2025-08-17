@@ -15,6 +15,17 @@ app:
   timezone: "UTC"
   puid: 1000
   pgid: 1000
+  # Application key management
+  appKey:
+    enabled: true
+    # If set, use this value; otherwise a secret will be created (unless existingSecret is set)
+    value: ""
+    # Use an existing secret instead of creating one. The key is defined by secretKey
+    existingSecret: ""
+    # Name for the created secret; defaults to <release>-bookstack-appkey when empty
+    secretName: ""
+    # Key name within the secret that holds the value
+    secretKey: app-key
 
 # Database configuration (provide an external MySQL/MariaDB)
 db:
