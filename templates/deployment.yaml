@@ -26,7 +26,8 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
-          {{- if .Values.envToDotenv.enabled }}
+          {{- $envToDotenv := .Values.envToDotenv | default (dict "enabled" true) -}}
+          {{- if $envToDotenv.enabled }}
           command: ["/bin/sh","-c"]
           args:
             - |
